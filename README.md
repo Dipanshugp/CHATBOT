@@ -25,17 +25,10 @@ The chatbot takes user input and returns intelligent responses using Natural Lan
 ---
 
 
----
-
-## 🔑 What is API Key?
-An API key is a secret code used to connect your application with an external service.
-
-👉 Example: When you use an AI chatbot, your app sends a request to the API server and gets a response.  
-👉 The API key verifies that you are authorized to use the service.
-
-⚠️ Never share your API key publicly.
-
----
+## 📂 Files
+- chatbot.py → Main chatbot logic
+- training.py → Model training
+- intents.json → Training data
 
 ## ⚙️ Installation
 
