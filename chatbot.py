@@ -11,7 +11,7 @@ import nltk
 from nltk.stem import WordNetLemmatizer
 from tensorflow.keras.models import load_model
 
-# Download required nltk data (safe)
+# Download nltk data (safe)
 try:
     nltk.data.find('tokenizers/punkt')
 except:
@@ -40,14 +40,11 @@ def clean_up_sentence(sentence):
     return [lemmatizer.lemmatize(word.lower()) for word in sentence_words]
 
 def bow(sentence, words):
-    sentence_words = clean_up_sentence(sentence)
     bag = [0] * len(words)
-
-    for s in sentence_words:
+    for s in clean_up_sentence(sentence):
         for i, word in enumerate(words):
             if word == s:
                 bag[i] = 1
-
     return np.array(bag)
 
 def predict_class(sentence):
@@ -60,13 +57,12 @@ def predict_class(sentence):
 
     return [{"intent": classes[r[0]], "probability": str(r[1])} for r in results]
 
-def get_response(ints, intents_json):
-    if len(ints) == 0:
+def get_response(ints):
+    if not ints:
         return "Sorry, I didn't understand."
 
     tag = ints[0]['intent']
-
-    for i in intents_json['intents']:
+    for i in intents['intents']:
         if i['tag'] == tag:
             return random.choice(i['responses'])
 
@@ -76,71 +72,52 @@ def extract_subject(question):
     words = question.split()
     return ' '.join(words[2:])
 
-def clean_text(text):
-    return re.sub(r'\([^()]*\)', '', text).strip()
-
-def search_wikipedia(question, num_sentences=2):
+def search_wikipedia(question):
     try:
         subject = extract_subject(question)
-        result = wikipedia.summary(subject, sentences=num_sentences)
-        return clean_text(result)
-    except wikipedia.exceptions.PageError:
-        return "Sorry, I couldn't find information."
-    except wikipedia.exceptions.DisambiguationError as e:
-        return f"Multiple matches found: {', '.join(e.options[:5])}"
+        return wikipedia.summary(subject, sentences=2)
     except:
-        return "Error, Something went wrong!"
+        return "Sorry, I couldn't find information."
 
-# ------------------ OUTPUT ------------------
-def typewriter_print(text, delay=0.02):
-    for char in text:
-        print(char, end='', flush=True)
-        time.sleep(delay)
-    print()
-
-def chatbot_response(text):
-    ints = predict_class(text)
-    return get_response(ints, intents)
-
-# ------------------ MESSAGE HANDLER ------------------
+# ------------------ LOGIC ------------------
 def process_message(message):
     # Arithmetic
     if any(op in message for op in ['+', '-', '*', '/', '**']):
         try:
-            ans = str(eval(message))
-            return f"Answer is {ans}"
+            return f"Answer is {eval(message)}"
         except:
             return "Error in calculation!"
 
     # Wikipedia
-    elif message.lower().startswith(('who', 'what', 'where', 'which', 'when', 'how')):
+    elif message.lower().startswith(('who','what','where','which','when','how')):
         return search_wikipedia(message)
 
-    # Normal chatbot
+    # Chatbot
     else:
-        return chatbot_response(message)
+        ints = predict_class(message)
+        return get_response(ints)
 
 # ------------------ CHAT LOOP ------------------
 def chat():
-    print("Chatbot is running! (type 'quit')")
+    print("Chatbot is running (type 'quit')")
     while True:
         try:
             print(grn, end='')
             message = input("User: ")
 
-            if message.lower() in ['quit', 'exit', 'close']:
+            if message.lower() in ['quit','exit','close']:
                 break
 
             response = process_message(message)
             print(blu + "IntelliChat:", response)
 
         except EOFError:
-            print("\nNo input available (CI mode). Exiting...")
+            print("\nCI mode detected. Exiting...")
             break
 
 # ------------------ MAIN ------------------
 if __name__ == "__main__":
-    if sys.stdin.isatty():   # Local machine
+    if sys.stdin.isatty():
         chat()
     else:
         print("Chatbot loaded successfully (CI mode)")
