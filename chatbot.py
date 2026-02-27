@@ -115,9 +115,10 @@ def chat():
             print("\nCI mode detected. Exiting...")
             break
 
-# ------------------ MAIN ------------------
+# ------------------ MAIN -----------------
 if __name__ == "__main__":
     if sys.stdin.isatty():
         chat()
     else:
         print("Chatbot loaded successfully (CI mode)")
+
