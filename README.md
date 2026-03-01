@@ -5,7 +5,7 @@ This project is a simple AI-powered chatbot built using Python. It uses an API t
 
 The chatbot takes user input and returns intelligent responses using Natural Language Processing (NLP).
 
----
+--- 
 
 ## 🚀 Features
 - 💬 Interactive chat system
